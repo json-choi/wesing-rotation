@@ -1,55 +1,19 @@
-import { SignJWT, jwtVerify } from 'jose';
-import { cookies } from 'next/headers';
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { db } from './db';
+import * as schema from './schema';
 
-const COOKIE_NAME = 'admin-token';
-const EXPIRY = '24h';
+export const auth = betterAuth({
+  database: drizzleAdapter(db, {
+    provider: 'pg',
+    schema,
+  }),
+  emailAndPassword: {
+    enabled: true,
+  },
+  trustedOrigins: [
+    process.env.BETTER_AUTH_URL ?? 'http://localhost:3000',
+  ],
+});
 
-function getSecret(): Uint8Array {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new Error('JWT_SECRET is not defined');
-  return new TextEncoder().encode(secret);
-}
-
-export async function createToken(): Promise<string> {
-  return new SignJWT({ admin: true })
-    .setProtectedHeader({ alg: 'HS256' })
-    .setIssuedAt()
-    .setExpirationTime(EXPIRY)
-    .sign(getSecret());
-}
-
-export async function verifyToken(token: string): Promise<boolean> {
-  try {
-    await jwtVerify(token, getSecret());
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function getAdminToken(): Promise<string | undefined> {
-  const cookieStore = await cookies();
-  return cookieStore.get(COOKIE_NAME)?.value;
-}
-
-export async function isAuthenticated(): Promise<boolean> {
-  const token = await getAdminToken();
-  if (!token) return false;
-  return verifyToken(token);
-}
-
-export async function setAuthCookie(token: string): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 24 * 60 * 60,
-    path: '/',
-  });
-}
-
-export async function clearAuthCookie(): Promise<void> {
-  const cookieStore = await cookies();
-  cookieStore.delete(COOKIE_NAME);
-}
+export type Session = typeof auth.$Infer.Session;

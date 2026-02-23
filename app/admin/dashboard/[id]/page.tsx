@@ -1,9 +1,13 @@
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
+import { schedules, weeks } from '@/lib/schema';
+import { eq, asc } from 'drizzle-orm';
 import { updateSchedule } from '@/lib/actions';
 import WeekEditor from '@/components/WeekEditor';
 import AddWeekForm from '@/components/AddWeekForm';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 export default async function ScheduleEditorPage({
   params,
@@ -12,12 +16,12 @@ export default async function ScheduleEditorPage({
 }) {
   const { id } = await params;
 
-  const schedule = await prisma.schedule.findUnique({
-    where: { id },
-    include: {
+  const schedule = await db.query.schedules.findFirst({
+    where: eq(schedules.id, id),
+    with: {
       weeks: {
-        orderBy: { order: 'asc' },
-        include: { assignments: true },
+        orderBy: [asc(weeks.order)],
+        with: { assignments: true },
       },
     },
   });

@@ -1,15 +1,24 @@
 'use client';
 
-import { useTransition } from 'react';
-import { logout } from '@/lib/actions';
+import { useState } from 'react';
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
 
 export default function LogoutButton() {
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    setIsPending(true);
+    await authClient.signOut({
+      fetchOptions: { onSuccess: () => router.push('/admin') },
+    });
+  };
 
   return (
     <button
       type="button"
-      onClick={() => startTransition(() => logout())}
+      onClick={handleLogout}
       disabled={isPending}
       className="text-sm text-gray-500 hover:text-red-500 transition-colors px-2 py-1.5 disabled:opacity-50"
     >

@@ -1,8 +1,10 @@
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
+import { schedules, weeks } from '@/lib/schema';
 import { INSTRUMENT_ROLES, RHYTHM_ROLES } from '@/lib/constants';
+import { desc, eq, asc } from 'drizzle-orm';
 import Link from 'next/link';
 
-export const revalidate = 0;
+export const dynamic = 'force-dynamic';
 
 interface Assignment {
   role: string;
@@ -110,20 +112,20 @@ export default async function HomePage({
 }) {
   const params = await searchParams;
 
-  const schedules = await prisma.schedule.findMany({
-    orderBy: { month: 'desc' },
-    select: { id: true, title: true, month: true },
-  });
+  const allSchedules = await db
+    .select({ id: schedules.id, title: schedules.title, month: schedules.month })
+    .from(schedules)
+    .orderBy(desc(schedules.month));
 
-  const selectedMonth = params.month ?? schedules[0]?.month;
+  const selectedMonth = params.month ?? allSchedules[0]?.month;
 
-  const schedule: Schedule | null = selectedMonth
-    ? await prisma.schedule.findFirst({
-        where: { month: selectedMonth },
-        include: {
+  const schedule = selectedMonth
+    ? await db.query.schedules.findFirst({
+        where: eq(schedules.month, selectedMonth),
+        with: {
           weeks: {
-            orderBy: { order: 'asc' },
-            include: { assignments: true },
+            orderBy: [asc(weeks.order)],
+            with: { assignments: true },
           },
         },
       })
@@ -146,9 +148,9 @@ export default async function HomePage({
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         {/* Month tabs */}
-        {schedules.length > 0 && (
+        {allSchedules.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8">
-            {schedules.map((s) => (
+            {allSchedules.map((s) => (
               <Link
                 key={s.id}
                 href={`/?month=${s.month}`}
@@ -165,7 +167,7 @@ export default async function HomePage({
         )}
 
         {/* No schedules */}
-        {schedules.length === 0 && (
+        {allSchedules.length === 0 && (
           <div className="text-center py-24 text-gray-400">
             <p className="text-5xl mb-4">📋</p>
             <p className="text-lg">아직 로테이션표가 없습니다.</p>

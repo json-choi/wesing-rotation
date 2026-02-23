@@ -1,19 +1,33 @@
 'use client';
 
-import { useActionState } from 'react';
-import { login } from '@/lib/actions';
+import { useState } from 'react';
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const initialState = { error: '' };
-
 export default function AdminLoginPage() {
-  const [state, formAction, pending] = useActionState(
-    async (_prev: typeof initialState, formData: FormData) => {
-      const result = await login(formData);
-      return result ?? initialState;
-    },
-    initialState
-  );
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPending(true);
+    setError('');
+
+    const data = new FormData(e.currentTarget);
+    const { error: authError } = await authClient.signIn.email({
+      email: data.get('email') as string,
+      password: data.get('password') as string,
+    });
+
+    if (authError) {
+      setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      setPending(false);
+    } else {
+      router.push('/admin/dashboard');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
@@ -28,7 +42,24 @@ export default function AdminLoginPage() {
         </div>
 
         {/* Login form */}
-        <form action={formAction} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+        >
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              이메일
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoFocus
+              className="input-field"
+              placeholder="admin@example.com"
+            />
+          </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1.5">
               비밀번호
@@ -38,15 +69,14 @@ export default function AdminLoginPage() {
               name="password"
               type="password"
               required
-              autoFocus
               className="input-field"
-              placeholder="관리자 비밀번호를 입력하세요"
+              placeholder="비밀번호를 입력하세요"
             />
           </div>
 
-          {state?.error && (
+          {error && (
             <div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg px-3 py-2">
-              {state.error}
+              {error}
             </div>
           )}
 

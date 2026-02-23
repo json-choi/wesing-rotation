@@ -1,8 +1,12 @@
-import { prisma } from '@/lib/db';
+import { db } from '@/lib/db';
+import { schedules, weeks } from '@/lib/schema';
 import { createSchedule } from '@/lib/actions';
 import DeleteScheduleButton from '@/components/DeleteScheduleButton';
 import LogoutButton from '@/components/LogoutButton';
+import { desc, eq, count } from 'drizzle-orm';
 import Link from 'next/link';
+
+export const dynamic = 'force-dynamic';
 
 function MonthLabel(month: string): string {
   const [year, m] = month.split('-');
@@ -10,10 +14,17 @@ function MonthLabel(month: string): string {
 }
 
 export default async function DashboardPage() {
-  const schedules = await prisma.schedule.findMany({
-    orderBy: { month: 'desc' },
-    include: { _count: { select: { weeks: true } } },
-  });
+  const allSchedules = await db
+    .select({
+      id: schedules.id,
+      title: schedules.title,
+      month: schedules.month,
+      weekCount: count(weeks.id),
+    })
+    .from(schedules)
+    .leftJoin(weeks, eq(weeks.scheduleId, schedules.id))
+    .groupBy(schedules.id)
+    .orderBy(desc(schedules.month));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -61,14 +72,14 @@ export default async function DashboardPage() {
         <section>
           <h2 className="text-base font-semibold text-gray-700 mb-3">로테이션표 목록</h2>
 
-          {schedules.length === 0 ? (
+          {allSchedules.length === 0 ? (
             <div className="bg-white rounded-2xl border border-dashed border-gray-200 p-12 text-center text-gray-400">
               <p className="text-4xl mb-3">📋</p>
               <p>아직 만들어진 로테이션표가 없습니다.</p>
             </div>
           ) : (
             <div className="space-y-3">
-              {schedules.map((s) => (
+              {allSchedules.map((s) => (
                 <div
                   key={s.id}
                   className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex items-center justify-between gap-4"
@@ -76,7 +87,7 @@ export default async function DashboardPage() {
                   <div>
                     <p className="font-semibold text-gray-800">{s.title}</p>
                     <p className="text-sm text-gray-400 mt-0.5">
-                      {MonthLabel(s.month)} · {s._count.weeks}주차
+                      {MonthLabel(s.month)} · {s.weekCount}주차
                     </p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">

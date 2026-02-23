@@ -2,34 +2,18 @@
 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-import { prisma } from './db';
-import { createToken, setAuthCookie, clearAuthCookie, isAuthenticated } from './auth';
+import { headers } from 'next/headers';
+import { eq, desc } from 'drizzle-orm';
+import { db } from './db';
+import { schedules, weeks, assignments } from './schema';
+import { auth } from './auth';
 import { ALL_ROLES } from './constants';
-
-// ── Auth ──────────────────────────────────────────────────────────────────────
-
-export async function login(formData: FormData) {
-  const password = formData.get('password') as string;
-
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
-    return { error: '비밀번호가 올바르지 않습니다.' };
-  }
-
-  const token = await createToken();
-  await setAuthCookie(token);
-  redirect('/admin/dashboard');
-}
-
-export async function logout() {
-  await clearAuthCookie();
-  redirect('/admin');
-}
 
 // ── Guard helper ──────────────────────────────────────────────────────────────
 
 async function requireAuth() {
-  const ok = await isAuthenticated();
-  if (!ok) redirect('/admin');
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) redirect('/admin');
 }
 
 // ── Schedules ─────────────────────────────────────────────────────────────────
@@ -39,12 +23,12 @@ export async function createSchedule(formData: FormData): Promise<void> {
 
   const title = formData.get('title') as string;
   const month = formData.get('month') as string;
-
   if (!title?.trim() || !month) return;
 
-  const schedule = await prisma.schedule.create({
-    data: { title: title.trim(), month },
-  });
+  const [schedule] = await db
+    .insert(schedules)
+    .values({ title: title.trim(), month })
+    .returning({ id: schedules.id });
 
   revalidatePath('/admin/dashboard');
   revalidatePath('/');
@@ -57,20 +41,20 @@ export async function updateSchedule(id: string, formData: FormData): Promise<vo
   const title = formData.get('title') as string;
   const month = formData.get('month') as string;
 
-  await prisma.schedule.update({
-    where: { id },
-    data: { title: title.trim(), month },
-  });
+  await db
+    .update(schedules)
+    .set({ title: title.trim(), month, updatedAt: new Date() })
+    .where(eq(schedules.id, id));
 
   revalidatePath('/admin/dashboard');
   revalidatePath(`/admin/dashboard/${id}`);
   revalidatePath('/');
 }
 
-export async function deleteSchedule(id: string) {
+export async function deleteSchedule(id: string): Promise<void> {
   await requireAuth();
 
-  await prisma.schedule.delete({ where: { id } });
+  await db.delete(schedules).where(eq(schedules.id, id));
 
   revalidatePath('/admin/dashboard');
   revalidatePath('/');
@@ -86,33 +70,31 @@ export async function createWeek(scheduleId: string, formData: FormData) {
   const note = (formData.get('note') as string) ?? '';
   const weekNumber = parseInt(formData.get('weekNumber') as string, 10) || 1;
 
-  const lastWeek = await prisma.week.findFirst({
-    where: { scheduleId },
-    orderBy: { order: 'desc' },
-  });
+  const [lastWeek] = await db
+    .select({ order: weeks.order })
+    .from(weeks)
+    .where(eq(weeks.scheduleId, scheduleId))
+    .orderBy(desc(weeks.order))
+    .limit(1);
 
-  const week = await prisma.week.create({
-    data: {
+  const [week] = await db
+    .insert(weeks)
+    .values({
       scheduleId,
       title: title.trim(),
       note: note.trim(),
       weekNumber,
       order: (lastWeek?.order ?? 0) + 1,
-    },
-  });
+    })
+    .returning({ id: weeks.id });
 
-  // Create empty assignment slots for every role
-  await prisma.assignment.createMany({
-    data: ALL_ROLES.map((r) => ({
-      weekId: week.id,
-      role: r.id,
-      names: '',
-    })),
-  });
+  await db.insert(assignments).values(
+    ALL_ROLES.map((r) => ({ weekId: week.id, role: r.id, names: '' }))
+  );
 
   revalidatePath(`/admin/dashboard/${scheduleId}`);
   revalidatePath('/');
-  return { success: true, weekId: week.id };
+  return { success: true };
 }
 
 export async function updateWeek(weekId: string, formData: FormData) {
@@ -121,27 +103,28 @@ export async function updateWeek(weekId: string, formData: FormData) {
   const title = formData.get('title') as string;
   const note = (formData.get('note') as string) ?? '';
 
-  await prisma.week.update({
-    where: { id: weekId },
-    data: { title: title.trim(), note: note.trim() },
-  });
+  await db
+    .update(weeks)
+    .set({ title: title.trim(), note: note.trim() })
+    .where(eq(weeks.id, weekId));
 
-  // Upsert assignments
-  const updates = ALL_ROLES.map((r) => {
-    const names = ((formData.get(`role_${r.id}`) as string) ?? '').trim();
-    return prisma.assignment.upsert({
-      where: { weekId_role: { weekId, role: r.id } },
-      create: { weekId, role: r.id, names },
-      update: { names },
-    });
-  });
+  await Promise.all(
+    ALL_ROLES.map((r) => {
+      const names = ((formData.get(`role_${r.id}`) as string) ?? '').trim();
+      return db
+        .insert(assignments)
+        .values({ weekId, role: r.id, names })
+        .onConflictDoUpdate({
+          target: [assignments.weekId, assignments.role],
+          set: { names },
+        });
+    })
+  );
 
-  await Promise.all(updates);
-
-  const week = await prisma.week.findUnique({
-    where: { id: weekId },
-    select: { scheduleId: true },
-  });
+  const [week] = await db
+    .select({ scheduleId: weeks.scheduleId })
+    .from(weeks)
+    .where(eq(weeks.id, weekId));
 
   if (week) {
     revalidatePath(`/admin/dashboard/${week.scheduleId}`);
@@ -154,12 +137,12 @@ export async function updateWeek(weekId: string, formData: FormData) {
 export async function deleteWeek(weekId: string) {
   await requireAuth();
 
-  const week = await prisma.week.findUnique({
-    where: { id: weekId },
-    select: { scheduleId: true },
-  });
+  const [week] = await db
+    .select({ scheduleId: weeks.scheduleId })
+    .from(weeks)
+    .where(eq(weeks.id, weekId));
 
-  await prisma.week.delete({ where: { id: weekId } });
+  await db.delete(weeks).where(eq(weeks.id, weekId));
 
   if (week) {
     revalidatePath(`/admin/dashboard/${week.scheduleId}`);
