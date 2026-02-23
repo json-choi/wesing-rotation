@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Schedule {
+  id        String   @id @default(cuid())
+  title     String
+  month     String   // "2025-03" format
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  weeks     Week[]
+
+  @@index([month])
+}
+
+model Week {
+  id          String       @id @default(cuid())
+  scheduleId  String
+  weekNumber  Int
+  title       String
+  note        String       @default("")
+  order       Int          @default(0)
+  schedule    Schedule     @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  assignments Assignment[]
+
+  @@index([scheduleId])
+}
+
+model Assignment {
+  id     String @id @default(cuid())
+  weekId String
+  role   String
+  names  String @default("")
+  week   Week   @relation(fields: [weekId], references: [id], onDelete: Cascade)
+
+  @@unique([weekId, role])
+  @@index([weekId])
+}
