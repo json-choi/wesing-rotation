@@ -4,11 +4,11 @@
 
 ## 스택
 
-- **Next.js 15** (App Router + Server Actions)
+- **Next.js 16** (App Router + Server Actions)
 - **TypeScript**
 - **Tailwind CSS**
-- **Prisma** (SQLite 로컬 / PostgreSQL 프로덕션)
-- **jose** (JWT 세션)
+- **Drizzle ORM** (Neon PostgreSQL)
+- **Better Auth** (인증)
 
 ## 로컬 개발
 
@@ -18,7 +18,7 @@ npm install
 
 # 2. 환경 변수 설정
 cp .env.example .env
-# .env 파일에서 비밀번호 및 JWT 시크릿 수정
+# .env 파일에서 비밀번호 및 시크릿 수정
 
 # 3. 데이터베이스 초기화
 npm run db:push
@@ -37,27 +37,17 @@ npm run dev
 - URL: `/admin`
 - 비밀번호: `.env`의 `ADMIN_PASSWORD` 값
 
-## Vercel 배포 (PostgreSQL)
+## Vercel 배포
 
 1. [Neon](https://neon.tech) 또는 [Supabase](https://supabase.com)에서 무료 PostgreSQL 데이터베이스 생성
 
-2. `prisma/schema.prisma`에서 provider 변경:
-```prisma
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-```
-
-3. Vercel 환경 변수 설정:
+2. Vercel 환경 변수 설정:
    - `DATABASE_URL` - PostgreSQL 연결 문자열
+   - `BETTER_AUTH_SECRET` - 랜덤 시크릿 (`openssl rand -base64 32`)
+   - `BETTER_AUTH_URL` - 배포 URL (예: `https://your-app.vercel.app`)
+   - `NEXT_PUBLIC_APP_URL` - 배포 URL
+   - `ADMIN_EMAIL` - 관리자 이메일
    - `ADMIN_PASSWORD` - 강력한 비밀번호
-   - `JWT_SECRET` - 랜덤 시크릿 (`openssl rand -base64 32`)
-
-4. `package.json`의 build 스크립트에 마이그레이션 추가:
-```json
-"build": "prisma generate && prisma db push && next build"
-```
 
 ## 역할 구성
 
