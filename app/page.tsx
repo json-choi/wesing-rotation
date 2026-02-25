@@ -64,8 +64,8 @@ function WeekTable({ week }: { week: Week }) {
                 </div>
             </div>
 
-            <div className="overflow-x-auto relative">
-                <table className="rotation-table">
+            <div className="overflow-x-auto relative -mx-4 sm:mx-0 px-2 sm:px-0">
+                <table className="rotation-table w-full">
                     <thead>
                         <tr>
                             {INSTRUMENT_ROLES.map((r) => (
@@ -80,11 +80,11 @@ function WeekTable({ week }: { week: Week }) {
                                 return (
                                     <td key={r.id}>
                                         {names ? (
-                                            <div className="flex flex-wrap gap-1.5">
+                                            <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5">
                                                 {names.split(",").map((name, idx) => (
                                                     <span
                                                         key={idx}
-                                                        className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 font-medium whitespace-nowrap"
+                                                        className="inline-flex items-center justify-center px-1 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-slate-100 text-slate-800 font-medium text-[10px] sm:text-sm break-keep text-center"
                                                     >
                                                         {name.trim()}
                                                     </span>
@@ -126,11 +126,11 @@ function WeekTable({ week }: { week: Week }) {
                                         }
                                     >
                                         {names ? (
-                                            <div className="flex flex-wrap gap-1.5">
+                                            <div className="flex flex-wrap justify-center gap-1 sm:gap-1.5">
                                                 {names.split(",").map((name, idx) => (
                                                     <span
                                                         key={idx}
-                                                        className="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 font-medium whitespace-nowrap"
+                                                        className="inline-flex items-center justify-center px-1 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-slate-100 text-slate-800 font-medium text-[10px] sm:text-sm break-keep text-center"
                                                     >
                                                         {name.trim()}
                                                     </span>
@@ -218,7 +218,7 @@ export default async function HomePage({
             <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
                 {/* Month tabs */}
                 {allSchedules.length > 0 && (
-                    <div className="flex flex-nowrap sm:flex-wrap gap-2 mb-6 sm:mb-10 overflow-x-auto pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide">
+                    <div className="flex flex-wrap justify-center gap-2 mb-6 sm:mb-10 pb-2 sm:pb-0">
                         {allSchedules.map((s) => (
                             <Link
                                 key={s.id}
@@ -301,13 +301,13 @@ export default async function HomePage({
 
             {/* Footer */}
             <footer className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-8">
-                <div className="border-t border-slate-200 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="border-t border-slate-200 pt-8 flex flex-col items-center justify-center gap-4 text-center">
                     <p className="text-sm text-slate-400">
                         © {new Date().getFullYear()} 위싱 찬양팀. All rights reserved.
                     </p>
                     <Link
                         href="/admin"
-                        className="text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors flex items-center gap-1"
+                        className="text-sm font-medium text-slate-500 hover:text-brand-600 transition-colors flex items-center justify-center gap-1"
                     >
                         <svg
                             className="w-4 h-4"

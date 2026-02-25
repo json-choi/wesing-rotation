@@ -55,15 +55,15 @@
 
 @layer components {
     .rotation-table {
-        @apply w-full text-sm text-left;
+        @apply w-full text-sm text-left table-fixed;
     }
 
     .rotation-table th {
-        @apply bg-slate-50/80 backdrop-blur-sm text-slate-500 font-semibold px-3 sm:px-4 py-2.5 sm:py-3 border-b border-slate-200 whitespace-nowrap text-xs sm:text-sm;
+        @apply bg-slate-50/80 backdrop-blur-sm text-slate-500 font-semibold px-0.5 sm:px-4 py-2 sm:py-3 border-b border-slate-200 text-center text-[9px] sm:text-sm break-keep;
     }
 
     .rotation-table td {
-        @apply px-3 sm:px-4 py-2.5 sm:py-3.5 border-b border-slate-100 align-middle transition-colors text-xs sm:text-sm;
+        @apply px-0.5 sm:px-4 py-2 sm:py-3.5 border-b border-slate-100 align-middle transition-colors text-center text-[10px] sm:text-sm;
     }
 
     .rotation-table tbody tr:hover td {
@@ -75,7 +75,7 @@
     }
 
     .rotation-table tr.subheader td {
-        @apply bg-slate-50/80 font-semibold text-slate-700 border-y border-slate-200 py-2 mt-2 text-xs sm:text-sm;
+        @apply bg-slate-50/80 font-semibold text-slate-700 border-y border-slate-200 py-2 mt-2 text-[10px] sm:text-sm;
     }
 
     .week-card {
