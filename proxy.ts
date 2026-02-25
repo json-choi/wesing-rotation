@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 // Full session verification happens server-side in requireAuth() (lib/actions.ts).
 const SESSION_COOKIE = 'better-auth.session_token';
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   if (!req.nextUrl.pathname.startsWith('/admin/dashboard')) {
     return NextResponse.next();
   }

@@ -1,0 +1,228 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1772035293933,
+  "projectRoot": "/Users/jaesong/Documents/my/wesing-rotation",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "16.1.6",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.0.0",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.0.0",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev --turbopack",
+      "build": "next build",
+      "start": "next start",
+      "lint": "next lint",
+      "db:push": "drizzle-kit push",
+      "db:generate": "drizzle-kit generate",
+      "db:migrate": "drizzle-kit migrate",
+      "db:seed": "tsx db/seed.ts",
+      "db:studio": "drizzle-kit studio"
+    }
+  },
+  "conventions": {
+    "namingStyle": "camelCase",
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "app",
+      "components",
+      "lib"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "app": {
+      "path": "app",
+      "purpose": "Application code",
+      "fileCount": 3,
+      "lastAccessed": 1772035293909,
+      "keyFiles": [
+        "globals.css",
+        "layout.tsx",
+        "page.tsx"
+      ]
+    },
+    "components": {
+      "path": "components",
+      "purpose": "UI components",
+      "fileCount": 4,
+      "lastAccessed": 1772035293910,
+      "keyFiles": [
+        "AddWeekForm.tsx",
+        "DeleteScheduleButton.tsx",
+        "LogoutButton.tsx",
+        "WeekEditor.tsx"
+      ]
+    },
+    "db": {
+      "path": "db",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1772035293917,
+      "keyFiles": [
+        "seed.ts"
+      ]
+    },
+    "lib": {
+      "path": "lib",
+      "purpose": "Library code",
+      "fileCount": 6,
+      "lastAccessed": 1772035293918,
+      "keyFiles": [
+        "actions.ts",
+        "auth-client.ts",
+        "auth.ts",
+        "constants.ts",
+        "db.ts"
+      ]
+    },
+    "app/api": {
+      "path": "app/api",
+      "purpose": "API routes",
+      "fileCount": 0,
+      "lastAccessed": 1772035293918,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "",
+      "accessCount": 6,
+      "lastAccessed": 1772036332668,
+      "type": "directory"
+    },
+    {
+      "path": "postcss.config.mjs",
+      "accessCount": 3,
+      "lastAccessed": 1772036388407,
+      "type": "file"
+    },
+    {
+      "path": "package.json",
+      "accessCount": 2,
+      "lastAccessed": 1772035389614,
+      "type": "file"
+    },
+    {
+      "path": "drizzle.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1772035427496,
+      "type": "file"
+    },
+    {
+      "path": "proxy.ts",
+      "accessCount": 2,
+      "lastAccessed": 1772035728333,
+      "type": "file"
+    },
+    {
+      "path": "app/globals.css",
+      "accessCount": 2,
+      "lastAccessed": 1772036419229,
+      "type": "file"
+    },
+    {
+      "path": "app/page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1772037235456,
+      "type": "file"
+    },
+    {
+      "path": "components/WeekEditor.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1772037246542,
+      "type": "file"
+    },
+    {
+      "path": ".env.example",
+      "accessCount": 1,
+      "lastAccessed": 1772035335384,
+      "type": "file"
+    },
+    {
+      "path": "middleware.ts",
+      "accessCount": 1,
+      "lastAccessed": 1772035486727,
+      "type": "file"
+    },
+    {
+      "path": "db/seed.ts",
+      "accessCount": 1,
+      "lastAccessed": 1772035768402,
+      "type": "file"
+    },
+    {
+      "path": "lib/schema.ts",
+      "accessCount": 1,
+      "lastAccessed": 1772035768968,
+      "type": "file"
+    },
+    {
+      "path": "lib/db.ts",
+      "accessCount": 1,
+      "lastAccessed": 1772035927244,
+      "type": "file"
+    },
+    {
+      "path": "tailwind.config.ts",
+      "accessCount": 1,
+      "lastAccessed": 1772036336131,
+      "type": "file"
+    },
+    {
+      "path": "lib/constants.ts",
+      "accessCount": 1,
+      "lastAccessed": 1772037208789,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
